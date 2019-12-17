@@ -2,7 +2,7 @@
 
 * Install all dependencies by running command:
 ```
-pip install -r reuirement.txt
+pip install -r reuirements.txt
 ```
 * Run command to parse data from url
 ```
