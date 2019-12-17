@@ -30,12 +30,3 @@ class PatentViewSet(viewsets.ModelViewSet):
             return Response({"description": "Not Found"}, status=status.HTTP_404_NOT_FOUND)
         return Response({"description": str(description)}, status=status.HTTP_200_OK)
 
-    @action(detail=False)
-    def get_news(self, request):
-        url = "https://www.indiatoday.in/news.html"
-        r = requests.get(url)
-        soup = BeautifulSoup(r.content, 'html5lib')
-        news_div = soup.find_all("div", attrs={'class': 'allnews-columns'})
-        print(news_div)
-        return Response({"news": str(news_div)}, status=status.HTTP_200_OK)
-
