@@ -2,16 +2,28 @@ from django.core.management.base import BaseCommand, CommandError
 import requests
 from bs4 import BeautifulSoup
 from patent.models import Patent
+from django.conf import settings
+
 
 class Command(BaseCommand):
 
     help = 'parse patents and save in to db'
-    publication_number = "US8531202B2"
-    base_url = 'https://patents.google.com'
-    patent_page_url_string = 'https://patents.google.com/patent/{patent}/en'
-    page_url = patent_page_url_string.format(patent=publication_number)
+    publication_number = settings.DEFAULT_PATENT_NUMBER
+    base_url = settings.GP_BASE_URL
+    page_url = settings.GP_PATENT_PAGE_URL.format(patent=publication_number)
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '-pn', '--publication_number',
+            type=str,
+            help='add a publication number to parse patent page'
+        )
 
     def handle(self, *args, **options):
+        publication_number = options['publication_number']
+        if publication_number:
+            self.publication_number = publication_number
+
         columns = ['Publication number', 'Priority date', 'Publication date', 'Assignee', 'Title']
         rows = self.parse_data(columns, self.page_url)
         objs = []
@@ -26,7 +38,8 @@ class Command(BaseCommand):
                 title=row[5],
             ))
 
-        Patent.objects.bulk_create(objs, len(objs), ignore_conflicts=True)
+        result = Patent.objects.bulk_create(objs, len(objs), ignore_conflicts=True)
+        print(result.__len__(), 'records parsed..')
 
     def parse_data(self, columns, url):
         r = requests.get(url)
@@ -34,7 +47,8 @@ class Command(BaseCommand):
         table_rows = []
 
         tables = soup.findAll('table')
-        for table in tables:
+        for index, table in enumerate(tables):
+            print("Parsing table {}.....".format(index))
             table_rows.extend(self.parse_table(table, columns))
 
         return table_rows

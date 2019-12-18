@@ -4,9 +4,14 @@
 ```
 pip install -r reuirements.txt
 ```
+
 * Run command to parse data from url
 ```
 pyhon manage.py parse_patents
+```
+--publication_number <publication_number> (optional parameter to specify the patent page to parse)
+```
+pyhon manage.py parse_patents --publication_number <publication_number>
 ```
 
 * Run server for APIs
